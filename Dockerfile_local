@@ -1,0 +1,33 @@
+FROM anapsix/alpine-java:jdk8
+MAINTAINER Adrian Muraru amuraru@adobe.com
+
+ENV \
+    ZK_RELEASE="http://archive.apache.org/dist/zookeeper/zookeeper-3.4.6/zookeeper-3.4.6.tar.gz"
+
+ADD exhibitor-1.5.6-adobe.jar /
+
+# Use one step so we can remove intermediate dependencies and minimize size
+RUN \
+    # Install ZK
+    wget -O /tmp/zookeeper.tgz $ZK_RELEASE \
+    && tar -xzf /tmp/zookeeper.tgz -C /opt/ \
+    && ln -s /opt/zookeeper-* /opt/zookeeper \
+    && mkdir -p /opt/zookeeper/transactions /opt/zookeeper/snapshots \
+    && rm /tmp/zookeeper.tgz \
+
+    # Install Exhibitor
+    && mkdir -p /opt/exhibitor/target \
+    && mv /exhibitor*jar /opt/exhibitor/target/ \
+    && ln -s /opt/exhibitor/target/exhibitor*jar /opt/exhibitor/exhibitor.jar
+
+# Add the wrapper script to setup configs and exec exhibitor
+ADD include/wrapper.sh /opt/exhibitor/wrapper.sh
+
+# Add the optional web.xml for authentication
+ADD include/web.xml /opt/exhibitor/web.xml
+
+USER root
+WORKDIR /opt/exhibitor
+EXPOSE 2181 2888 3888 8181
+
+ENTRYPOINT ["bash", "-ex", "/opt/exhibitor/wrapper.sh"]
