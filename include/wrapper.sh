@@ -53,7 +53,7 @@ if [[ -n ${S3_BUCKET} ]]; then
 
   BACKUP_CONFIG="--configtype s3 --s3config ${S3_BUCKET}:${S3_PREFIX}/config ${S3_SECURITY} --s3region ${AWS_REGION} --s3backup true"
 else
-  BACKUP_CONFIG="--configtype file --fsconfigdir /opt/zookeeper/local_configs --filesystembackup true"
+  BACKUP_CONFIG="--configtype file --fsconfigdir /shared/local_configs --filesystembackup true"
 fi
 
 if [[ -n ${ZK_PASSWORD} ]]; then
